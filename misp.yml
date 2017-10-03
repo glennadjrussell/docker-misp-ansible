@@ -26,7 +26,7 @@
         name: crits
         image: harvarditsecurity/misp
         state: present
-        command: /initdb
+        command: initdb
         published_ports:
           - 443:443
           - 80:80
