@@ -1,0 +1,49 @@
+- name: Install and run MISP
+  hosts: all
+  tasks:
+    - name: install epel
+      yum: name=epel-release state=present
+
+    - name: install pip
+      yum: name=python-pip state=present
+
+    - name: install docker-py
+      pip:
+        name: "{{ item }}"
+      with_items:
+      - docker-py
+
+    - name: get misp image
+      docker_image:
+        name: harvarditsecurity/misp
+        state: present
+
+    - name: create misp data directory
+      file: path=~/misp-data state=directory
+
+    - name: initialize misp
+      docker_container:
+        name: crits
+        image: harvarditsecurity/misp
+        state: present
+        command: /initdb
+        published_ports:
+          - 443:443
+          - 80:80
+          - 3306:3306
+        volumes:
+          - ~/misp-data:/var/lib/mysql
+    
+    - name: run misp
+      docker_container:
+        name: crits
+        state: started
+        restart: yes
+        image: harvarditsecurity/misp
+        published_ports:
+          - 443:443
+          - 80:80
+          - 3306:3306
+        volumes:
+          - ~/misp-data:/var/lib/mysql
+
